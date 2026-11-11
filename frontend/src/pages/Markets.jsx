@@ -326,3 +326,4 @@ const Markets = ({ onOpenConnectModal }) => {
 };
 
 export default Markets;
+

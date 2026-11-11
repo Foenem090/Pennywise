@@ -310,3 +310,4 @@ const EarnPage = ({ onNotify, onOpenConnectModal }) => {
 };
 
 export default EarnPage;
+

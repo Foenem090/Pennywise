@@ -54,11 +54,6 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
             </NavLink>
           </li>
           <li>
-            <NavLink to="/developers" className={navLinkClass}>
-              Developers
-            </NavLink>
-          </li>
-          <li>
             <NavLink to="/about" className={navLinkClass}>
               About
             </NavLink>
@@ -120,11 +115,6 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
             <li>
               <NavLink to="/earn" onClick={closeMenu} className={mobileNavLinkClass}>
                 Earn & Staking
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/developers" onClick={closeMenu} className={mobileNavLinkClass}>
-                Developers
               </NavLink>
             </li>
             <li>

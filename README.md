@@ -55,7 +55,6 @@ C.App/
 │   │   │   ├── ContactPage.jsx     # IRA rollover consultation request & office info
 │   │   │   ├── SupportPage.jsx     # Help Center & knowledge base articles
 │   │   │   ├── FaqPage.jsx         # Interactive categorized FAQ accordions
-│   │   │   ├── DevelopersPage.jsx  # Cloud, Commerce, Pro & interactive API code explorer
 │   │   │   ├── AboutPage.jsx       # Mission, leadership, custody stats & security
 │   │   │   ├── LegalPage.jsx       # Regulatory oversight & transparent fee schedule
 │   │   │   ├── PrivacyPage.jsx     # Data protection policy & AES-256 standards

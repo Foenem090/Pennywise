@@ -5,7 +5,7 @@ import { FaFacebook, FaGithub, FaLinkedin, FaTwitter } from 'react-icons/fa';
 const Footer = () => {
   return (
     <footer className="w-full bg-slate-100 text-gray-700 py-12 md:py-16 px-6 border-t border-gray-200">
-      <div className="max-w-[1240px] mx-auto grid grid-cols-2 md:grid-cols-5 gap-8 border-b border-gray-300 pb-12">
+      <div className="max-w-[1240px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 border-b border-gray-300 pb-12">
         
         {/* col 1: Brand & Tagline */}
         <div className="col-span-2 md:col-span-1 flex flex-col space-y-3">
@@ -24,7 +24,7 @@ const Footer = () => {
             <Link to="/" className="hover:text-blue-600 transition-colors duration-200">Home</Link>
             <Link to="/markets" className="hover:text-blue-600 transition-colors duration-200">Crypto Markets</Link>
             <Link to="/earn" className="hover:text-blue-600 transition-colors duration-200">Earn & Staking</Link>
-            <Link to="/developers" className="hover:text-blue-600 transition-colors duration-200">Developer APIs</Link>
+            <Link to="/faq" className="hover:text-blue-600 transition-colors duration-200">FAQ & Guides</Link>
           </div>
         </div>
 
@@ -33,38 +33,19 @@ const Footer = () => {
           <h5 className="font-bold text-gray-900 text-base mb-4 uppercase tracking-wider">Support</h5>
           <div className="flex flex-col space-y-2.5 text-sm font-medium">
             <Link to="/support" className="hover:text-blue-600 transition-colors duration-200">Help Center</Link>
-            <Link to="/faq" className="hover:text-blue-600 transition-colors duration-200">Frequently Asked</Link>
             <Link to="/contact" className="hover:text-blue-600 transition-colors duration-200">Advisor Rollover</Link>
             <Link to="/contact" className="hover:text-blue-600 transition-colors duration-200">Contact Us</Link>
+            <Link to="/legal#disclosures" className="hover:text-blue-600 transition-colors duration-200">Security & Insurance</Link>
           </div>
         </div>
 
-        {/* col 4: Developers */}
-        <div>
-          <h5 className="font-bold text-gray-900 text-base mb-4 uppercase tracking-wider">Developers</h5>
-          <div className="flex flex-col space-y-2.5 text-sm font-medium">
-            <Link to="/developers" className="hover:text-blue-600 transition-colors duration-200">Cloud Infrastructure</Link>
-            <Link to="/developers" className="hover:text-blue-600 transition-colors duration-200">Commerce Gateway</Link>
-            <Link to="/developers" className="hover:text-blue-600 transition-colors duration-200">Institutional Pro</Link>
-            <a
-              href="http://localhost:8000/docs"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-blue-600 transition-colors duration-200 inline-flex items-center gap-1"
-            >
-              <span>Swagger API</span>
-              <span className="text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-bold">Docs</span>
-            </a>
-          </div>
-        </div>
-
-        {/* col 5: Company */}
+        {/* col 4: Company */}
         <div>
           <h5 className="font-bold text-gray-900 text-base mb-4 uppercase tracking-wider">Company</h5>
           <div className="flex flex-col space-y-2.5 text-sm font-medium">
             <Link to="/about" className="hover:text-blue-600 transition-colors duration-200">About Penny Wise</Link>
-            <Link to="/about" className="hover:text-blue-600 transition-colors duration-200">Security & Custody</Link>
-            <Link to="/legal" className="hover:text-blue-600 transition-colors duration-200">Fee Schedule</Link>
+            <Link to="/about#security" className="hover:text-blue-600 transition-colors duration-200">Security Architecture</Link>
+            <Link to="/legal#fees" className="hover:text-blue-600 transition-colors duration-200">Fee Schedule</Link>
             <Link to="/legal" className="hover:text-blue-600 transition-colors duration-200">Legal Disclosures</Link>
           </div>
         </div>

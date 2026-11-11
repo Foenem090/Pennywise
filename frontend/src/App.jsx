@@ -13,7 +13,6 @@ import EarnPage from './pages/EarnPage';
 import ContactPage from './pages/ContactPage';
 import SupportPage from './pages/SupportPage';
 import FaqPage from './pages/FaqPage';
-import DevelopersPage from './pages/DevelopersPage';
 import AboutPage from './pages/AboutPage';
 import LegalPage from './pages/LegalPage';
 import PrivacyPage from './pages/PrivacyPage';
@@ -73,7 +72,6 @@ function App() {
           <Route path="/contact" element={<ContactPage onNotify={showToast} />} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/faq" element={<FaqPage />} />
-          <Route path="/developers" element={<DevelopersPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/legal" element={<LegalPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
