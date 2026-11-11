@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link, NavLink } from 'react-router-dom';
 import { FaBars, FaTimes, FaWallet } from 'react-icons/fa';
 
 const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
@@ -17,35 +18,55 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
 
+  const navLinkClass = ({ isActive }) =>
+    `transition-colors duration-200 text-sm font-semibold ${
+      isActive ? 'text-blue-600 font-bold' : 'text-gray-700 hover:text-blue-600'
+    }`;
+
+  const mobileNavLinkClass = ({ isActive }) =>
+    `block py-2.5 transition-colors text-base font-semibold ${
+      isActive ? 'text-blue-600 font-bold bg-blue-50/50 rounded-xl' : 'text-gray-800 hover:text-blue-600'
+    }`;
+
   return (
     <nav className="sticky top-0 left-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
       <div className="max-w-[1240px] mx-auto px-4 h-[80px] flex justify-between items-center">
         {/* Brand Logo */}
-        <a href="/" className="text-2xl font-extrabold tracking-tight text-gray-900 cursor-pointer">
+        <Link to="/" onClick={closeMenu} className="text-2xl font-extrabold tracking-tight text-gray-900 cursor-pointer">
           Penny <span className="text-[#1a6fca]">Wise</span>  
-        </a>
+        </Link>
 
         {/* Desktop Navigation Links */}
-        <ul className="hidden md:flex items-center space-x-8 font-medium text-gray-700">
+        <ul className="hidden md:flex items-center space-x-8 font-medium">
           <li>
-            <a href="/" className="hover:text-blue-600 transition-colors duration-200">
+            <NavLink to="/" end className={navLinkClass}>
               Home
-            </a>
+            </NavLink>
           </li>
           <li>
-            <a href="#featured" className="hover:text-blue-600 transition-colors duration-200">
-              Featured
-            </a>
+            <NavLink to="/markets" className={navLinkClass}>
+              Markets
+            </NavLink>
           </li>
           <li>
-            <a href="#earn" className="hover:text-blue-600 transition-colors duration-200">
+            <NavLink to="/earn" className={navLinkClass}>
               Earn
-            </a>
+            </NavLink>
           </li>
           <li>
-            <a href="#contact" className="hover:text-blue-600 transition-colors duration-200">
+            <NavLink to="/developers" className={navLinkClass}>
+              Developers
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/about" className={navLinkClass}>
+              About
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/contact" className={navLinkClass}>
               Contact
-            </a>
+            </NavLink>
           </li>
         </ul>
 
@@ -85,35 +106,45 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
             open ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-4 pointer-events-none'
           }`}
         >
-          <ul className="flex flex-col p-6 space-y-4 text-center font-semibold text-gray-800 text-lg">
+          <ul className="flex flex-col p-6 space-y-2 text-center text-lg">
             <li>
-              <a href="/" onClick={closeMenu} className="block py-2 hover:text-blue-600 transition-colors">
+              <NavLink to="/" end onClick={closeMenu} className={mobileNavLinkClass}>
                 Home
-              </a>
+              </NavLink>
             </li>
             <li>
-              <a href="#featured" onClick={closeMenu} className="block py-2 hover:text-blue-600 transition-colors">
-                Featured
-              </a>
+              <NavLink to="/markets" onClick={closeMenu} className={mobileNavLinkClass}>
+                Markets
+              </NavLink>
             </li>
             <li>
-              <a href="#earn" onClick={closeMenu} className="block py-2 hover:text-blue-600 transition-colors">
-                Earn
-              </a>
+              <NavLink to="/earn" onClick={closeMenu} className={mobileNavLinkClass}>
+                Earn & Staking
+              </NavLink>
             </li>
             <li>
-              <a href="#contact" onClick={closeMenu} className="block py-2 hover:text-blue-600 transition-colors">
+              <NavLink to="/developers" onClick={closeMenu} className={mobileNavLinkClass}>
+                Developers
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/about" onClick={closeMenu} className={mobileNavLinkClass}>
+                About Us
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/contact" onClick={closeMenu} className={mobileNavLinkClass}>
                 Contact
-              </a>
+              </NavLink>
             </li>
-            <li className="pt-2">
+            <li className="pt-3">
               {connectedAccount ? (
                 <button 
                   onClick={() => {
                     closeMenu();
                     onOpenConnectModal();
                   }}
-                  className="w-full inline-flex items-center justify-center space-x-2 py-3 px-4 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 text-sm font-semibold hover:bg-emerald-100 transition-colors"
+                  className="w-full inline-flex items-center justify-center space-x-2 py-3 px-4 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 text-sm font-semibold hover:bg-emerald-100 transition-colors cursor-pointer"
                 >
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span>{formatAddress(connectedAccount)}</span>
@@ -124,10 +155,10 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
                     closeMenu();
                     onOpenConnectModal();
                   }}
-                  className="btn w-full inline-flex items-center justify-center space-x-2"
+                  className="btn w-full inline-flex items-center justify-center space-x-2 cursor-pointer"
                 >
                   <FaWallet className="text-sm" />
-                  <span>Connect</span>
+                  <span>Connect Wallet</span>
                 </button>
               )}
             </li>

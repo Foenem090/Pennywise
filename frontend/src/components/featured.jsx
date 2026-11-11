@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { FiArrowUpRight, FiArrowDown, FiSearch, FiX } from 'react-icons/fi';
 import { apiService } from '../services/api';
 
@@ -114,12 +115,12 @@ const Featured = () => {
               Live market tracking, institutional security, and IRA-eligible cryptocurrency assets.
             </p>
             <div>
-              <button 
-                onClick={handleOpenExpanded}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+              <Link 
+                to="/markets"
+                className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
               >
-                See More Coins
-              </button>
+                See All Markets &rarr;
+              </Link>
             </div>
           </div>
 
