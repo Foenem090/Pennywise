@@ -39,17 +39,31 @@ C.App/
 │   │   │   ├── bgImg.jpg           # Hero graphic
 │   │   │   └── trade.png           # Earn section illustration
 │   │   ├── components/
-│   │   │   ├── Navbar.jsx          # Responsive nav with wallet indicator & mobile menu
+│   │   │   ├── Navbar.jsx          # Responsive nav with route links & Web3 wallet badge
 │   │   │   ├── hero.jsx            # Hero banner & newsletter lead capture
-│   │   │   ├── featured.jsx        # Live market cards, loading skeleton & search modal
+│   │   │   ├── featured.jsx        # Live market cards & link to full markets
 │   │   │   ├── earn.jsx            # Staking promotions & interactive APY calculator
-│   │   │   ├── Contact.jsx         # Customer inquiries & advisor rollover form
+│   │   │   ├── Contact.jsx         # Contact inquiry component
 │   │   │   ├── footer.jsx          # Multi-column footer & copyright
 │   │   │   ├── ConnectModal.jsx    # Real Web3 wallet modal (MetaMask & Coinbase)
-│   │   │   └── Toast.jsx           # Global notification toast
+│   │   │   ├── Toast.jsx           # Global notification toast
+│   │   │   └── ScrollToTop.jsx     # Route transition scroll restore
+│   │   ├── pages/                  # Dedicated React Router destination pages
+│   │   │   ├── Home.jsx            # Landing page
+│   │   │   ├── Markets.jsx         # Cryptocurrency markets, filters & search
+│   │   │   ├── EarnPage.jsx        # Staking platform, APY tiers & yield calculator
+│   │   │   ├── ContactPage.jsx     # IRA rollover consultation request & office info
+│   │   │   ├── SupportPage.jsx     # Help Center & knowledge base articles
+│   │   │   ├── FaqPage.jsx         # Interactive categorized FAQ accordions
+│   │   │   ├── DevelopersPage.jsx  # Cloud, Commerce, Pro & interactive API code explorer
+│   │   │   ├── AboutPage.jsx       # Mission, leadership, custody stats & security
+│   │   │   ├── LegalPage.jsx       # Regulatory oversight & transparent fee schedule
+│   │   │   ├── PrivacyPage.jsx     # Data protection policy & AES-256 standards
+│   │   │   ├── TermsPage.jsx       # Platform terms of service
+│   │   │   └── NotFoundPage.jsx    # Custom 404 page
 │   │   ├── services/
 │   │   │   └── api.js              # Centralized Axios API service
-│   │   ├── App.jsx                 # Root layout & state coordinator
+│   │   ├── App.jsx                 # Routes coordinator & layout
 │   │   ├── App.css                 # Custom keyframes & utilities
 │   │   ├── index.css               # Typography, Tailwind v4 imports & CSS variables
 │   │   └── main.jsx                # Entry point
