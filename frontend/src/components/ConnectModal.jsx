@@ -242,3 +242,4 @@ const ConnectModal = ({ isOpen, onClose, connectedAccount, onConnect, onDisconne
 };
 
 export default ConnectModal;
+

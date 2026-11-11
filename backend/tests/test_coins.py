@@ -26,3 +26,4 @@ def test_search_coins(client):
     assert "coins" in data
     symbols = [coin["symbol"].lower() for coin in data["coins"]]
     assert "btc" in symbols
+

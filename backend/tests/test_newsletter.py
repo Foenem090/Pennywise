@@ -31,3 +31,4 @@ def test_subscribe_newsletter_invalid_email(client):
         json={"email": "not-an-email"}
     )
     assert response.status_code == 422
+

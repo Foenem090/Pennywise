@@ -32,3 +32,4 @@ Interactive documentation is available at: `http://localhost:8000/docs`
 ```bash
 pytest
 ```
+

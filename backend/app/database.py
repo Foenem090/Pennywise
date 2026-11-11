@@ -32,3 +32,4 @@ def init_db():
     # Import all models here so that Base metadata registers them
     from .models import newsletter, contact  # noqa: F401
     Base.metadata.create_all(bind=engine)
+

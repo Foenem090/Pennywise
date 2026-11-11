@@ -23,3 +23,4 @@ def calculate_earnings(asset: str, amount: float) -> CalculatorResponse:
         estimated_yearly_return=round(yearly_return, 2),
         total_estimated_value_1y=round(total_estimated, 2)
     )
+

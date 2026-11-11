@@ -25,3 +25,4 @@ def test_submit_contact_inquiry_invalid(client):
         }
     )
     assert response.status_code == 422
+

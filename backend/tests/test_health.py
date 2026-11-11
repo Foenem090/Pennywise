@@ -5,3 +5,4 @@ def test_health_check(client):
     assert data["status"] == "healthy"
     assert "version" in data
     assert "timestamp" in data
+

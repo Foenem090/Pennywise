@@ -30,3 +30,4 @@ def test_estimate_invalid_amount(client):
         json={"asset": "BTC", "amount": -50.0}
     )
     assert response.status_code == 422
+

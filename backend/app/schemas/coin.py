@@ -21,3 +21,4 @@ class CoinListResponse(BaseModel):
     count: int
     source: str
     cached: bool
+

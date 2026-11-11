@@ -35,3 +35,4 @@ class InMemoryRateLimiter:
 # Global instances for abuse protection on public forms
 newsletter_limiter = InMemoryRateLimiter(max_requests=10, window_seconds=60)
 contact_limiter = InMemoryRateLimiter(max_requests=5, window_seconds=60)
+

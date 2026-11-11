@@ -20,3 +20,4 @@ async def get_rates():
 async def estimate_returns(payload: CalculatorRequest):
     """Calculates estimated daily, monthly, and yearly returns on crypto deposits."""
     return calculate_earnings(asset=payload.asset, amount=payload.amount)
+

@@ -40,3 +40,4 @@ async def submit_contact_inquiry(
         created_at=inquiry.created_at,
         message="Thank you for reaching out. A Penny Wise specialist will review your inquiry shortly."
     )
+

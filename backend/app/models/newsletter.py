@@ -14,3 +14,4 @@ class NewsletterSubscriber(Base):
         nullable=False
     )
     is_active = Column(Boolean, default=True, nullable=False)
+

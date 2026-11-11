@@ -202,3 +202,4 @@ npm --prefix frontend run lint
 npm --prefix frontend run build
 ```
 Result: **0 errors, 0 warnings.**
+

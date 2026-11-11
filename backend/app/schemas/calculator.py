@@ -23,3 +23,4 @@ class CalculatorResponse(BaseModel):
 
 class SupportedRatesResponse(BaseModel):
     rates: Dict[str, float]
+

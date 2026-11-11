@@ -13,3 +13,4 @@ api_router.include_router(contact_router)
 api_router.include_router(calculator_router)
 
 __all__ = ["api_router"]
+

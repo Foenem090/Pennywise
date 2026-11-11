@@ -20,3 +20,4 @@ async def search_coins(
 ):
     """Search for coins matching a keyword or symbol."""
     return await crypto_service.search_coins(query=q, limit=limit)
+
