@@ -93,16 +93,18 @@ C.App/
 │   │   │   └── calculator.py       # GET /calculator/rates & POST /calculator/estimate
 │   │   ├── services/
 │   │   │   ├── crypto_service.py   # CoinGecko integration, caching & fallback
-│   │   │   └── calculator_service.py # APY return calculations
+│   │   │   ├── calculator_service.py # APY return calculations
+│   │   │   └── email_service.py    # Resend transactional email (welcome, ack, admin alerts)
 │   │   └── utils/
 │   │       └── rate_limiter.py     # In-memory sliding window abuse protection
-│   ├── tests/                      # Automated test suite (12 tests)
+│   ├── tests/                      # Automated test suite (30 tests)
 │   │   ├── conftest.py             # In-memory SQLite fixtures & TestClient
 │   │   ├── test_health.py
 │   │   ├── test_coins.py
 │   │   ├── test_newsletter.py
 │   │   ├── test_contact.py
-│   │   └── test_calculator.py
+│   │   ├── test_calculator.py
+│   │   └── test_email_service.py   # Email service unit + route integration tests
 │   ├── requirements.txt            # Python dependencies
 │   ├── .env.example                # Backend environment template
 │   ├── .env                        # Local backend environment config
@@ -129,6 +131,11 @@ CORS_ORIGINS=["http://localhost:5173","http://127.0.0.1:5173","http://localhost:
 COINGECKO_API_BASE=https://api.coingecko.com/api/v3
 CACHE_TTL_SECONDS=60
 RATE_LIMIT_PER_MINUTE=60
+
+# Resend transactional email
+RESEND_API_KEY=re_your_api_key_here
+MAIL_FROM=hello@yourdomain.com
+ADMIN_EMAIL=admin@yourdomain.com
 ```
 > **PostgreSQL Migration:** To switch from SQLite to PostgreSQL, update `DATABASE_URL` in `backend/.env`:
 > `DATABASE_URL=postgresql://user:password@localhost:5432/pennywise_db`
@@ -138,6 +145,75 @@ Copy `frontend/.env.example` to `frontend/.env`:
 ```env
 VITE_API_BASE_URL=http://localhost:8000/api/v1
 ```
+
+---
+
+## 4. Email Setup (Resend)
+
+Penny Wise uses [Resend](https://resend.com) for transactional email delivery.
+No SMTP server is required — the backend calls the Resend REST API directly via HTTPX.
+
+### Step 1 — Create a Resend account
+Sign up at [https://resend.com](https://resend.com). The free tier supports up to
+3,000 emails per month and 100 emails per day.
+
+### Step 2 — Verify a sending domain
+1. In the Resend dashboard, navigate to **Domains → Add Domain**.
+2. Enter the domain you own (e.g. `pennywise.finance`).
+3. Add the DNS records Resend provides (MX, SPF, DKIM, DMARC) to your domain registrar.
+4. Click **Verify** once DNS has propagated (may take up to 48 hours).
+
+> **During development only:** Resend allows sending to your own verified email
+> address without domain verification. This is sufficient for local testing.
+
+### Step 3 — Generate an API key
+1. In the Resend dashboard, go to **API Keys → Create API Key**.
+2. Give it a name (e.g. `pennywise-backend`).
+3. Set permission to **Sending access**.
+4. Copy the key — it starts with `re_`.
+
+### Step 4 — Configure environment variables
+Edit `backend/.env` with your real credentials:
+
+```env
+# Your Resend API key (starts with "re_"):
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx
+
+# A verified sender address on your verified Resend domain:
+MAIL_FROM=hello@yourdomain.com
+
+# The admin email that receives contact form notifications:
+ADMIN_EMAIL=you@yourdomain.com
+```
+
+> **Security:** `RESEND_API_KEY` is never exposed to the React frontend.
+> It is loaded server-side only via Pydantic Settings from `backend/.env`.
+> The `.env` file is excluded from Git via `.gitignore`.
+
+### Emails sent by the platform
+
+| Trigger | Recipient | Subject |
+|---|---|---|
+| New newsletter subscription | Subscriber | Welcome to Penny Wise 🚀 |
+| New newsletter subscription | `ADMIN_EMAIL` | \[Penny Wise\] New subscriber: {email} |
+| Contact form submission | Submitter | We received your message |
+| Contact form submission | `ADMIN_EMAIL` | \[Penny Wise\] New inquiry from {name} |
+
+### Testing email delivery manually
+With the backend running, test a newsletter subscription:
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/newsletter/subscribe \
+  -H "Content-Type: application/json" \
+  -d '{"email": "your-real-email@example.com"}'
+```
+Check your inbox (and `ADMIN_EMAIL` inbox) for the branded emails.
+
+### What happens when email delivery fails
+Email dispatch happens **after** the database record is saved. A Resend API
+error or timeout will:
+- Log a warning to the backend console (no API key is included in log output).
+- Return a successful `201` response to the frontend — the subscription or inquiry is preserved.
+- Never retry automatically (to avoid duplicate sends on form re-submission).
 
 ---
 
@@ -199,12 +275,14 @@ Execute pytest from the root:
 ```bash
 python -m pytest
 ```
-All 12 unit and integration tests cover:
+All 30 unit and integration tests cover:
 - Health check endpoint (`test_health.py`)
 - Cryptocurrency listing, limits, and symbol search (`test_coins.py`)
 - Newsletter subscribe, validation, and duplicate handling (`test_newsletter.py`)
 - Contact inquiry storage, validation, and abuse protection (`test_contact.py`)
 - APY return calculations and rate configurations (`test_calculator.py`)
+- Email service: Resend dispatch, error handling, HTML escaping, missing config (`test_email_service.py`)
+- Route integration: emails sent post-DB-commit, DB records survive email failures (`test_email_service.py`)
 
 ### Linting & Production Build
 ```bash

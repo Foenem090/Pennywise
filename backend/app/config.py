@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Optional, Union
 import json
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     DATABASE_URL: str = "sqlite:///./pennywise.db"
-    
+
     # CORS Origins
     CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:5173",
@@ -34,6 +34,11 @@ class Settings(BaseSettings):
         "ADA": 3.2,
         "XRP": 3.0,
     }
+
+    # Resend transactional email
+    RESEND_API_KEY: Optional[str] = None
+    MAIL_FROM: str = "noreply@example.com"
+    ADMIN_EMAIL: Optional[str] = None
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
