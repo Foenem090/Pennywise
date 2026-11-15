@@ -2,15 +2,29 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from .config import settings
 
-# Configure connection arguments based on database dialect
+# Configure connection arguments and engine parameters based on database dialect
+is_sqlite = settings.DATABASE_URL.startswith("sqlite")
+
 connect_args = {}
-if settings.DATABASE_URL.startswith("sqlite"):
+engine_kwargs = {
+    "pool_pre_ping": True,
+}
+
+if is_sqlite:
     connect_args["check_same_thread"] = False
+else:
+    # Conservative settings for serverless PostgreSQL on Neon / Render
+    engine_kwargs.update({
+        "pool_size": 3,
+        "max_overflow": 2,
+        "pool_timeout": 30,
+        "pool_recycle": 300,
+    })
 
 engine = create_engine(
     settings.DATABASE_URL,
     connect_args=connect_args,
-    pool_pre_ping=True
+    **engine_kwargs
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

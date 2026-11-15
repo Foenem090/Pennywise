@@ -22,10 +22,28 @@ backend/*.db
 .coverage
 htmlcov/
 
-# Environment variables
+# Database backups and dumps
+*.dump
+*.backup
+*.bak
+*.tar.gz
+*backup*.sql
+*dump*.sql
+backups/
+
+# Environment variables & secrets
 .env
+.env.*
+!.env.example
 frontend/.env
+frontend/.env.*
+!frontend/.env.example
 backend/.env
+backend/.env.*
+!backend/.env.example
+postgres.txt
+*secret*
+*credential*
 
 # Editor & OS files
 .DS_Store
@@ -35,3 +53,5 @@ Thumbs.db
 *.swp
 *.suo
 
+
+.neon
