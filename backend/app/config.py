@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     DATABASE_URL: str = "sqlite:///./pennywise.db"
 
+    # Frontend Application URL (for email links and client redirects)
+    FRONTEND_URL: str = "http://localhost:5173"
+
     # CORS Origins
     CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:5173",
@@ -43,16 +46,28 @@ class Settings(BaseSettings):
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        default_localhost = [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ]
         if isinstance(v, str):
             if v.startswith("[") and v.endswith("]"):
                 try:
-                    return json.loads(v)
+                    parsed = json.loads(v)
+                    if not isinstance(parsed, list):
+                        parsed = [str(parsed)]
                 except Exception:
-                    pass
-            return [i.strip() for i in v.split(",") if i.strip()]
+                    parsed = [i.strip() for i in v.split(",") if i.strip()]
+            else:
+                parsed = [i.strip() for i in v.split(",") if i.strip()]
         elif isinstance(v, list):
-            return v
-        return ["*"]
+            parsed = v
+        else:
+            return default_localhost
+
+        return list(dict.fromkeys(list(parsed) + default_localhost))
 
     model_config = SettingsConfigDict(
         env_file=".env",

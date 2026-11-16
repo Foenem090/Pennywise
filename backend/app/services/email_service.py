@@ -256,7 +256,7 @@ def _newsletter_welcome_html(email: str) -> str:
 
 {_divider()}
 
-{_cta_button(text="Explore Penny Wise →", href="http://localhost:5173")}
+{_cta_button(text="Explore Penny Wise →", href=f"{settings.FRONTEND_URL.rstrip('/')}")}
 
 <p style="margin:24px 0 0;font-size:13px;color:{BRAND_MUTED};line-height:1.6;text-align:center;">
   To unsubscribe at any time, reply with "unsubscribe" in the subject line.
@@ -265,6 +265,7 @@ def _newsletter_welcome_html(email: str) -> str:
 
 
 def _newsletter_welcome_text(email: str) -> str:
+    base_url = settings.FRONTEND_URL.rstrip('/')
     return f"""Welcome to Penny Wise!
 
 You have successfully subscribed using: {email}
@@ -275,7 +276,7 @@ What to expect:
 - Staking yield updates and new pool announcements
 - Security and platform transparency reports
 
-Visit Penny Wise: http://localhost:5173
+Visit Penny Wise: {base_url}
 
 To unsubscribe, reply with "unsubscribe" in the subject line.
 
@@ -355,7 +356,7 @@ def _contact_ack_html(name: str, email: str) -> str:
 
 {_divider()}
 
-{_cta_button(text="Visit Penny Wise →", href="http://localhost:5173")}
+{_cta_button(text="Visit Penny Wise →", href=f"{settings.FRONTEND_URL.rstrip('/')}")}
 
 <p style="margin:24px 0 0;font-size:13px;color:{BRAND_MUTED};text-align:center;">
   If you did not submit this inquiry, you can safely ignore this email.
@@ -364,6 +365,7 @@ def _contact_ack_html(name: str, email: str) -> str:
 
 
 def _contact_ack_text(name: str, email: str) -> str:
+    base_url = settings.FRONTEND_URL.rstrip('/')
     return f"""Hi {name},
 
 Thank you for contacting Penny Wise!
@@ -373,9 +375,9 @@ We have received your inquiry from: {email}
 A member of our specialist team will respond within 1–2 business days.
 
 In the meantime:
-- FAQ: http://localhost:5173/faq
-- Markets: http://localhost:5173/markets
-- Earn calculator: http://localhost:5173/earn
+- FAQ: {base_url}/faq
+- Markets: {base_url}/markets
+- Earn calculator: {base_url}/earn
 
 © 2026 Penny Wise Financial Technologies, Inc.
 """

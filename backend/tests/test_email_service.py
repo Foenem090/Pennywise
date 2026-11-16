@@ -34,12 +34,21 @@ MOCK_FROM = "test@pennywise.test"
 MOCK_ADMIN = "admin@pennywise.test"
 
 
-def _patch_settings(monkeypatch, *, api_key=MOCK_API_KEY, mail_from=MOCK_FROM, admin=MOCK_ADMIN):
+def _patch_settings(
+    monkeypatch,
+    *,
+    api_key=MOCK_API_KEY,
+    mail_from=MOCK_FROM,
+    admin=MOCK_ADMIN,
+    frontend_url=None,
+):
     """Override email-related settings for the duration of a test."""
     from app import config as cfg_module
     monkeypatch.setattr(cfg_module.settings, "RESEND_API_KEY", api_key)
     monkeypatch.setattr(cfg_module.settings, "MAIL_FROM", mail_from)
     monkeypatch.setattr(cfg_module.settings, "ADMIN_EMAIL", admin)
+    if frontend_url is not None:
+        monkeypatch.setattr(cfg_module.settings, "FRONTEND_URL", frontend_url)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -411,3 +420,161 @@ def test_contact_invalid_email_rejected(client, monkeypatch):
     )
 
     assert resp.status_code == 422
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 4. Frontend URL & CORS configuration tests
+# ══════════════════════════════════════════════════════════════════════════
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_newsletter_welcome_uses_configured_frontend_url(monkeypatch):
+    """Newsletter welcome email uses the configured FRONTEND_URL in HTML and text."""
+    prod_url = "https://pennywise.example.com"
+    _patch_settings(monkeypatch, frontend_url=prod_url)
+    route = respx.post(RESEND_URL).mock(
+        return_value=HttpxResponse(200, json={"id": "welcome_prod"})
+    )
+
+    result = await send_newsletter_welcome("subscriber@example.com")
+
+    assert result.success is True
+    import json
+    body = json.loads(route.calls[0].request.content)
+    assert f'href="{prod_url}"' in body["html"]
+    assert f"Visit Penny Wise: {prod_url}" in body["text"]
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_newsletter_welcome_uses_default_local_url(monkeypatch):
+    """Newsletter welcome email uses http://localhost:5173 when default."""
+    _patch_settings(monkeypatch, frontend_url="http://localhost:5173")
+    route = respx.post(RESEND_URL).mock(
+        return_value=HttpxResponse(200, json={"id": "welcome_local"})
+    )
+
+    result = await send_newsletter_welcome("subscriber@example.com")
+
+    assert result.success is True
+    import json
+    body = json.loads(route.calls[0].request.content)
+    assert 'href="http://localhost:5173"' in body["html"]
+    assert "Visit Penny Wise: http://localhost:5173" in body["text"]
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_contact_ack_uses_configured_frontend_url(monkeypatch):
+    """Contact acknowledgement email uses the configured FRONTEND_URL in links."""
+    prod_url = "https://pennywise.example.com"
+    _patch_settings(monkeypatch, frontend_url=prod_url)
+    route = respx.post(RESEND_URL).mock(
+        return_value=HttpxResponse(200, json={"id": "ack_prod"})
+    )
+
+    result = await send_contact_acknowledgement("Jane", "jane@example.com")
+
+    assert result.success is True
+    import json
+    body = json.loads(route.calls[0].request.content)
+    assert f'href="{prod_url}"' in body["html"]
+    assert f"FAQ: {prod_url}/faq" in body["text"]
+    assert f"Markets: {prod_url}/markets" in body["text"]
+    assert f"Earn calculator: {prod_url}/earn" in body["text"]
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_contact_ack_uses_default_local_url(monkeypatch):
+    """Contact acknowledgement email uses http://localhost:5173 when default."""
+    _patch_settings(monkeypatch, frontend_url="http://localhost:5173")
+    route = respx.post(RESEND_URL).mock(
+        return_value=HttpxResponse(200, json={"id": "ack_local"})
+    )
+
+    result = await send_contact_acknowledgement("Jane", "jane@example.com")
+
+    assert result.success is True
+    import json
+    body = json.loads(route.calls[0].request.content)
+    assert 'href="http://localhost:5173"' in body["html"]
+    assert "FAQ: http://localhost:5173/faq" in body["text"]
+    assert "Markets: http://localhost:5173/markets" in body["text"]
+    assert "Earn calculator: http://localhost:5173/earn" in body["text"]
+
+
+ALL_LOCALHOST_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+
+def test_cors_origins_single_string(monkeypatch):
+    """CORS validator handles a single production URL as a string and retains all localhost origins."""
+    from app.config import Settings
+    s = Settings(CORS_ORIGINS="https://pennywise.example.com")
+    assert "https://pennywise.example.com" in s.CORS_ORIGINS
+    for local in ALL_LOCALHOST_ORIGINS:
+        assert local in s.CORS_ORIGINS
+
+
+def test_cors_origins_parsing_comma_separated(monkeypatch):
+    """CORS validator correctly parses multiple comma-separated production URLs."""
+    from app.config import Settings
+    s = Settings(CORS_ORIGINS="https://pennywise.example.com, https://preview.example.com, https://admin.example.com")
+    assert "https://pennywise.example.com" in s.CORS_ORIGINS
+    assert "https://preview.example.com" in s.CORS_ORIGINS
+    assert "https://admin.example.com" in s.CORS_ORIGINS
+    for local in ALL_LOCALHOST_ORIGINS:
+        assert local in s.CORS_ORIGINS
+
+
+def test_cors_origins_parsing_json_string(monkeypatch):
+    """CORS validator correctly parses JSON string array into a list."""
+    from app.config import Settings
+    s = Settings(CORS_ORIGINS='["https://app.example.com", "https://api.example.com"]')
+    assert "https://app.example.com" in s.CORS_ORIGINS
+    assert "https://api.example.com" in s.CORS_ORIGINS
+    for local in ALL_LOCALHOST_ORIGINS:
+        assert local in s.CORS_ORIGINS
+
+
+def test_cors_origins_parsing_list(monkeypatch):
+    """CORS validator correctly accepts a Python list."""
+    from app.config import Settings
+    s = Settings(CORS_ORIGINS=["https://app.example.com", "https://preview.example.com"])
+    assert "https://app.example.com" in s.CORS_ORIGINS
+    assert "https://preview.example.com" in s.CORS_ORIGINS
+    for local in ALL_LOCALHOST_ORIGINS:
+        assert local in s.CORS_ORIGINS
+
+
+def test_cors_origins_duplicates_removed(monkeypatch):
+    """CORS validator removes duplicate origins while preserving order and localhost."""
+    from app.config import Settings
+    s = Settings(CORS_ORIGINS="https://dup.com, http://localhost:5173, https://dup.com")
+    assert s.CORS_ORIGINS.count("https://dup.com") == 1
+    assert s.CORS_ORIGINS.count("http://localhost:5173") == 1
+    for local in ALL_LOCALHOST_ORIGINS:
+        assert local in s.CORS_ORIGINS
+
+
+def test_cors_origins_default_fallback():
+    """Default Settings configuration contains exactly the four localhost origins."""
+    from app.config import Settings
+    s = Settings(CORS_ORIGINS=None)
+    for local in ALL_LOCALHOST_ORIGINS:
+        assert local in s.CORS_ORIGINS
+
+
+def test_cors_origins_via_environment_variable(monkeypatch):
+    """CORS origins supplied via OS environment variable (as on Render) are genuinely exercised."""
+    from app.config import Settings
+    monkeypatch.setenv("CORS_ORIGINS", "https://render-deployed-frontend.onrender.com")
+    s = Settings()
+    assert "https://render-deployed-frontend.onrender.com" in s.CORS_ORIGINS
+    for local in ALL_LOCALHOST_ORIGINS:
+        assert local in s.CORS_ORIGINS
