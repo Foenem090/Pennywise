@@ -10,7 +10,7 @@ from ..services.email_service import (
     send_contact_acknowledgement,
     send_contact_admin_notification,
 )
-from ..utils.rate_limiter import contact_limiter
+from ..utils.rate_limiter import contact_limiter, resolve_client_ip
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ async def submit_contact_inquiry(
     db: Session = Depends(get_db),
 ):
     # Abuse prevention
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = resolve_client_ip(request)
     contact_limiter.check_rate_limit(client_ip)
 
     clean_name = payload.name.strip()

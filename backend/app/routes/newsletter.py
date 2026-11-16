@@ -10,7 +10,7 @@ from ..services.email_service import (
     send_newsletter_admin_notification,
     send_newsletter_welcome,
 )
-from ..utils.rate_limiter import newsletter_limiter
+from ..utils.rate_limiter import newsletter_limiter, resolve_client_ip
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ async def subscribe_newsletter(
     db: Session = Depends(get_db),
 ):
     # Abuse prevention
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = resolve_client_ip(request)
     newsletter_limiter.check_rate_limit(client_ip)
 
     clean_email = payload.email.lower().strip()
