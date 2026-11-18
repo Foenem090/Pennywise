@@ -81,3 +81,9 @@ def resolve_client_ip(request: Request) -> Optional[str]:
 newsletter_limiter = InMemoryRateLimiter(max_requests=10, window_seconds=60)
 contact_limiter = InMemoryRateLimiter(max_requests=5, window_seconds=60)
 
+# Global instances for public market-data endpoints
+coins_limiter = InMemoryRateLimiter(max_requests=30, window_seconds=60)
+search_limiter = InMemoryRateLimiter(max_requests=30, window_seconds=60)
+calculator_estimate_limiter = InMemoryRateLimiter(max_requests=30, window_seconds=60)
+calculator_rates_limiter = InMemoryRateLimiter(max_requests=60, window_seconds=60)
+

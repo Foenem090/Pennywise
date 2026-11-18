@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowUpRight, FiArrowDown, FiSearch, FiX } from 'react-icons/fi';
 import { apiService } from '../services/api';
@@ -19,6 +19,8 @@ const Featured = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const searchDebounceRef = useRef(null);
+  const latestQueryRef = useRef('');
 
   useEffect(() => {
     let isMounted = true;
@@ -43,52 +45,92 @@ const Featured = () => {
     };
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, []);
+
   const handleOpenExpanded = () => {
     setShowExpanded(true);
     setSearchQuery('');
+    latestQueryRef.current = '';
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
     setSearchResults([]);
     // Load top 20 coins
     apiService
       .getCoins(20)
       .then((res) => {
-        if (res && res.coins) {
+        if (!latestQueryRef.current.trim() && res && res.coins) {
           setSearchResults(res.coins);
         }
       })
       .catch(() => {
-        setSearchResults(fallbackCoins);
+        if (!latestQueryRef.current.trim()) {
+          setSearchResults(fallbackCoins);
+        }
       });
   };
 
   const handleSearch = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
+    latestQueryRef.current = query;
+
+    // Cancel any pending debounced search
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
 
     if (!query.trim()) {
+      // Empty query: show top coins immediately, no debounce needed
+      setIsSearching(false);
       apiService
         .getCoins(20)
-        .then((res) => setSearchResults(res.coins || fallbackCoins))
-        .catch(() => setSearchResults(fallbackCoins));
+        .then((res) => {
+          if (!latestQueryRef.current.trim()) {
+            setSearchResults(res.coins || fallbackCoins);
+          }
+        })
+        .catch(() => {
+          if (!latestQueryRef.current.trim()) {
+            setSearchResults(fallbackCoins);
+          }
+        });
       return;
     }
 
+    // Debounce: wait 350 ms after the user stops typing before firing the request.
     setIsSearching(true);
-    apiService
-      .searchCoins(query, 16)
-      .then((res) => {
-        setSearchResults(res.coins || []);
-      })
-      .catch(() => {
-        const filtered = fallbackCoins.filter(
-          (c) =>
-            c.name.toLowerCase().includes(query.toLowerCase()) ||
-            c.symbol.toLowerCase().includes(query.toLowerCase())
-        );
-        setSearchResults(filtered);
-      })
-      .finally(() => {
-        setIsSearching(false);
-      });
+    searchDebounceRef.current = setTimeout(() => {
+      const requestedQuery = query;
+      apiService
+        .searchCoins(requestedQuery, 16)
+        .then((res) => {
+          if (latestQueryRef.current === requestedQuery) {
+            setSearchResults(res.coins || []);
+          }
+        })
+        .catch(() => {
+          if (latestQueryRef.current === requestedQuery) {
+            const filtered = fallbackCoins.filter(
+              (c) =>
+                c.name.toLowerCase().includes(requestedQuery.toLowerCase()) ||
+                c.symbol.toLowerCase().includes(requestedQuery.toLowerCase())
+            );
+            setSearchResults(filtered);
+          }
+        })
+        .finally(() => {
+          if (latestQueryRef.current === requestedQuery) {
+            setIsSearching(false);
+          }
+        });
+    }, 350);
   };
 
   const formatPrice = (price) => {
