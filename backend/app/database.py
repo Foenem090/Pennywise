@@ -20,6 +20,9 @@ else:
         "pool_timeout": 30,
         "pool_recycle": 300,
     })
+    connect_args.update({
+        "connect_timeout": 10,
+    })
 
 engine = create_engine(
     settings.DATABASE_URL,
