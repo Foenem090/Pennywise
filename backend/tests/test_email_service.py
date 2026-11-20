@@ -513,53 +513,57 @@ ALL_LOCALHOST_ORIGINS = [
 
 
 def test_cors_origins_single_string(monkeypatch):
-    """CORS validator handles a single production URL as a string and retains all localhost origins."""
+    """CORS validator handles a single production URL as a string.
+    When an external origin is explicitly provided, localhost origins are NOT injected."""
     from app.config import Settings
     s = Settings(CORS_ORIGINS="https://pennywise.example.com")
     assert "https://pennywise.example.com" in s.CORS_ORIGINS
     for local in ALL_LOCALHOST_ORIGINS:
-        assert local in s.CORS_ORIGINS
+        assert local not in s.CORS_ORIGINS
 
 
 def test_cors_origins_parsing_comma_separated(monkeypatch):
-    """CORS validator correctly parses multiple comma-separated production URLs."""
+    """CORS validator correctly parses multiple comma-separated production URLs.
+    When external origins are explicitly provided, localhost origins are NOT injected."""
     from app.config import Settings
     s = Settings(CORS_ORIGINS="https://pennywise.example.com, https://preview.example.com, https://admin.example.com")
     assert "https://pennywise.example.com" in s.CORS_ORIGINS
     assert "https://preview.example.com" in s.CORS_ORIGINS
     assert "https://admin.example.com" in s.CORS_ORIGINS
     for local in ALL_LOCALHOST_ORIGINS:
-        assert local in s.CORS_ORIGINS
+        assert local not in s.CORS_ORIGINS
 
 
 def test_cors_origins_parsing_json_string(monkeypatch):
-    """CORS validator correctly parses JSON string array into a list."""
+    """CORS validator correctly parses JSON string array into a list.
+    When external origins are explicitly provided, localhost origins are NOT injected."""
     from app.config import Settings
     s = Settings(CORS_ORIGINS='["https://app.example.com", "https://api.example.com"]')
     assert "https://app.example.com" in s.CORS_ORIGINS
     assert "https://api.example.com" in s.CORS_ORIGINS
     for local in ALL_LOCALHOST_ORIGINS:
-        assert local in s.CORS_ORIGINS
+        assert local not in s.CORS_ORIGINS
 
 
 def test_cors_origins_parsing_list(monkeypatch):
-    """CORS validator correctly accepts a Python list."""
+    """CORS validator correctly accepts a Python list.
+    When external origins are explicitly provided, localhost origins are NOT injected."""
     from app.config import Settings
     s = Settings(CORS_ORIGINS=["https://app.example.com", "https://preview.example.com"])
     assert "https://app.example.com" in s.CORS_ORIGINS
     assert "https://preview.example.com" in s.CORS_ORIGINS
     for local in ALL_LOCALHOST_ORIGINS:
-        assert local in s.CORS_ORIGINS
+        assert local not in s.CORS_ORIGINS
 
 
 def test_cors_origins_duplicates_removed(monkeypatch):
-    """CORS validator removes duplicate origins while preserving order and localhost."""
+    """CORS validator removes duplicate origins while preserving order.
+    Mixed external + localhost input: external presence means localhost is NOT injected,
+    but duplicates within the provided list are still deduplicated."""
     from app.config import Settings
     s = Settings(CORS_ORIGINS="https://dup.com, http://localhost:5173, https://dup.com")
     assert s.CORS_ORIGINS.count("https://dup.com") == 1
     assert s.CORS_ORIGINS.count("http://localhost:5173") == 1
-    for local in ALL_LOCALHOST_ORIGINS:
-        assert local in s.CORS_ORIGINS
 
 
 def test_cors_origins_default_fallback():
@@ -571,10 +575,11 @@ def test_cors_origins_default_fallback():
 
 
 def test_cors_origins_via_environment_variable(monkeypatch):
-    """CORS origins supplied via OS environment variable (as on Render) are genuinely exercised."""
+    """CORS origins supplied via OS environment variable (as on Render) are genuinely exercised.
+    When an external origin is supplied via env var, localhost origins are NOT injected."""
     from app.config import Settings
     monkeypatch.setenv("CORS_ORIGINS", "https://render-deployed-frontend.onrender.com")
     s = Settings()
     assert "https://render-deployed-frontend.onrender.com" in s.CORS_ORIGINS
     for local in ALL_LOCALHOST_ORIGINS:
-        assert local in s.CORS_ORIGINS
+        assert local not in s.CORS_ORIGINS

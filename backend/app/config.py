@@ -1,5 +1,6 @@
 from typing import List, Optional, Union
 import json
+from urllib.parse import urlsplit
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -52,6 +53,11 @@ class Settings(BaseSettings):
             "http://localhost:3000",
             "http://127.0.0.1:3000",
         ]
+
+        # No explicit value → return localhost defaults for local development
+        if v is None:
+            return default_localhost
+
         if isinstance(v, str):
             if v.startswith("[") and v.endswith("]"):
                 try:
@@ -63,11 +69,40 @@ class Settings(BaseSettings):
             else:
                 parsed = [i.strip() for i in v.split(",") if i.strip()]
         elif isinstance(v, list):
-            parsed = v
+            parsed = list(v)
         else:
             return default_localhost
 
-        return list(dict.fromkeys(list(parsed) + default_localhost))
+        # Reject wildcard origins
+        if "*" in parsed:
+            raise ValueError(
+                'Wildcard origin "*" is not permitted. Specify explicit origin URLs.'
+            )
+
+        # Remove duplicates while preserving order
+        parsed = list(dict.fromkeys(parsed))
+
+        # Determine whether the caller supplied any external (non-localhost) origin.
+        # Only treat origins whose actual hostname is exactly "localhost" or "127.0.0.1"
+        # as localhost origins. Origins with hostnames such as "localhost.attacker.com"
+        # are treated as external.
+        # If external origins are present, return exactly what was configured — do NOT
+        # inject localhost origins.
+        # If only genuine localhost origins are present, supplement to the full
+        # default localhost set so local development works correctly.
+        def _is_localhost(origin: str) -> bool:
+            try:
+                parsed_url = urlsplit(origin if "://" in origin else f"//{origin}")
+                return parsed_url.hostname in ("localhost", "127.0.0.1")
+            except Exception:
+                return False
+
+        has_external_origin = any(not _is_localhost(o) for o in parsed)
+
+        if has_external_origin:
+            return parsed
+        else:
+            return list(dict.fromkeys(parsed + default_localhost))
 
     model_config = SettingsConfigDict(
         env_file=".env",
