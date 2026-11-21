@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     DATABASE_URL: str = "sqlite:///./pennywise.db"
 
+    # Database Timeouts
+    DB_CONNECT_TIMEOUT_SECONDS: int = 10
+    DB_STATEMENT_TIMEOUT_MS: int = 15000
+
     # Frontend Application URL (for email links and client redirects)
     FRONTEND_URL: str = "http://localhost:5173"
 
@@ -43,6 +47,24 @@ class Settings(BaseSettings):
     RESEND_API_KEY: Optional[str] = None
     MAIL_FROM: str = "noreply@example.com"
     ADMIN_EMAIL: Optional[str] = None
+
+    @field_validator("DB_CONNECT_TIMEOUT_SECONDS")
+    @classmethod
+    def validate_connect_timeout(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError(
+                "DB_CONNECT_TIMEOUT_SECONDS must be a positive integer greater than 0."
+            )
+        return v
+
+    @field_validator("DB_STATEMENT_TIMEOUT_MS")
+    @classmethod
+    def validate_statement_timeout(cls, v: int) -> int:
+        if v < 0:
+            raise ValueError(
+                "DB_STATEMENT_TIMEOUT_MS must be a non-negative integer (>= 0)."
+            )
+        return v
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod

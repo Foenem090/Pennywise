@@ -1,5 +1,5 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy import create_engine, event, text
+from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from .config import settings
 
 # Configure connection arguments and engine parameters based on database dialect
@@ -21,7 +21,7 @@ else:
         "pool_recycle": 300,
     })
     connect_args.update({
-        "connect_timeout": 10,
+        "connect_timeout": settings.DB_CONNECT_TIMEOUT_SECONDS,
     })
 
 engine = create_engine(
@@ -31,6 +31,21 @@ engine = create_engine(
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+@event.listens_for(Session, "after_begin")
+def set_postgresql_statement_timeout(session, transaction, connection):
+    """Enforce a transaction-scoped statement timeout on PostgreSQL connections.
+
+    Using SET LOCAL ensures the timeout resets automatically on commit or rollback,
+    which is essential for compatibility with PgBouncer transaction pooling.
+    SQLite and other non-PostgreSQL dialects are bypassed.
+    """
+    if connection.dialect.name == "postgresql" and settings.DB_STATEMENT_TIMEOUT_MS > 0:
+        connection.execute(
+            text(f"SET LOCAL statement_timeout = {int(settings.DB_STATEMENT_TIMEOUT_MS)}")
+        )
+
 
 Base = declarative_base()
 
