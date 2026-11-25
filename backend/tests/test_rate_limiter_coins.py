@@ -15,11 +15,14 @@ Covers:
   - Health endpoint is NOT rate limited.
 """
 
+from unittest.mock import AsyncMock
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.services.email_service import EmailResult
 from app.utils.rate_limiter import (
     coins_limiter,
     search_limiter,
@@ -300,7 +303,17 @@ class TestExistingLimitsUnchanged:
         )
         assert blocked.status_code == status.HTTP_429_TOO_MANY_REQUESTS
 
-    def test_newsletter_limit_still_10_per_60s(self):
+    def test_newsletter_limit_still_10_per_60s(self, monkeypatch):
+        mock_result = EmailResult(success=True)
+        monkeypatch.setattr(
+            "app.routes.newsletter.send_newsletter_welcome",
+            AsyncMock(return_value=mock_result),
+        )
+        monkeypatch.setattr(
+            "app.routes.newsletter.send_newsletter_admin_notification",
+            AsyncMock(return_value=mock_result),
+        )
+
         tc = _client_for("10.5.0.2")
         for i in range(10):
             res = tc.post(
