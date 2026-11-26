@@ -21,6 +21,13 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
+def include_object(object, name, type_, reflected, compare_to):
+    """Exclude Neon's unmanaged sample table from Alembic autogeneration."""
+    if type_ == "table" and name == "playing_with_neon":
+        return False
+    return True
+
+
 def get_migration_url() -> str:
     """Resolve the database connection URL for migrations safely.
 
@@ -71,6 +78,7 @@ def run_migrations_offline() -> None:
         render_as_batch=True,
         compare_type=True,
         compare_server_default=True,
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -98,6 +106,7 @@ def run_migrations_online() -> None:
             render_as_batch=True,
             compare_type=True,
             compare_server_default=True,
+            include_object=include_object,
         )
 
         with context.begin_transaction():
