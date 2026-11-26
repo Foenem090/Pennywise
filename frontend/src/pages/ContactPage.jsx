@@ -158,25 +158,33 @@ const ContactPage = ({ onNotify }) => {
             </p>
 
             {statusMsg && (
-              <div
-                className={`p-4 mb-6 rounded-2xl text-sm font-semibold border ${
-                  statusMsg.type === 'error'
-                    ? 'bg-rose-50 text-rose-800 border-rose-200'
-                    : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                }`}
-              >
-                {statusMsg.text}
-              </div>
+              statusMsg.type === 'error' ? (
+                <div
+                  role="alert"
+                  className="p-4 mb-6 rounded-2xl text-sm font-semibold border bg-rose-50 text-rose-800 border-rose-200"
+                >
+                  {statusMsg.text}
+                </div>
+              ) : (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="p-4 mb-6 rounded-2xl text-sm font-semibold border bg-emerald-50 text-emerald-800 border-emerald-200"
+                >
+                  {statusMsg.text}
+                </div>
+              )
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                  <label htmlFor="contact-name" className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
                     Full Name *
                   </label>
                   <input
                     type="text"
+                    id="contact-name"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
@@ -187,11 +195,12 @@ const ContactPage = ({ onNotify }) => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                  <label htmlFor="contact-email" className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
                     Email Address *
                   </label>
                   <input
                     type="email"
+                    id="contact-email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
@@ -204,11 +213,12 @@ const ContactPage = ({ onNotify }) => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                  <label htmlFor="contact-phone" className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
                     Phone Number (Optional)
                   </label>
                   <input
                     type="tel"
+                    id="contact-phone"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
@@ -218,10 +228,11 @@ const ContactPage = ({ onNotify }) => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                  <label htmlFor="contact-account-type" className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
                     Account / Rollover Type
                   </label>
                   <select
+                    id="contact-account-type"
                     name="accountType"
                     value={formData.accountType}
                     onChange={handleChange}
@@ -237,10 +248,11 @@ const ContactPage = ({ onNotify }) => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                <label htmlFor="contact-message" className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
                   Message or Specific Inquiries *
                 </label>
                 <textarea
+                  id="contact-message"
                   name="message"
                   rows={4}
                   value={formData.message}

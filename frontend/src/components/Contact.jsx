@@ -127,15 +127,22 @@ const Contact = ({ onNotify }) => {
             <h3 className="text-xl font-bold text-gray-900 mb-6">Send Us a Direct Message</h3>
 
             {feedback && (
-              <div
-                className={`p-4 mb-6 rounded-xl text-sm font-medium border ${
-                  feedback.type === 'error'
-                    ? 'bg-rose-50 text-rose-800 border-rose-200'
-                    : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                }`}
-              >
-                {feedback.text}
-              </div>
+              feedback.type === 'error' ? (
+                <div
+                  role="alert"
+                  className="p-4 mb-6 rounded-xl text-sm font-medium border bg-rose-50 text-rose-800 border-rose-200"
+                >
+                  {feedback.text}
+                </div>
+              ) : (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="p-4 mb-6 rounded-xl text-sm font-medium border bg-emerald-50 text-emerald-800 border-emerald-200"
+                >
+                  {feedback.text}
+                </div>
+              )
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">

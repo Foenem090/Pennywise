@@ -291,6 +291,7 @@ const EarnPage = ({ onNotify, onOpenConnectModal }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email..."
+              aria-label="Email address for APY rate updates"
               required
               disabled={isSubmitting}
               className="px-4 py-3 rounded-xl bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-white w-full sm:w-64 placeholder-gray-400"

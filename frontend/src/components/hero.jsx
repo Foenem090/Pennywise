@@ -61,6 +61,7 @@ const Hero = ({ onNotify }) => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-gray-800 placeholder-gray-400 shadow-sm transition-all"
                   placeholder="Enter your e-mail..." 
+                  aria-label="Email address for retirement investment updates"
                   disabled={isLoading}
                   required
                 />

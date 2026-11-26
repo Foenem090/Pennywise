@@ -19,18 +19,18 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
   };
 
   const navLinkClass = ({ isActive }) =>
-    `transition-colors duration-200 text-sm font-semibold ${isActive ? 'text-blue-600 font-bold' : 'text-gray-700 hover:text-blue-600'
+    `transition-colors duration-200 text-sm font-semibold rounded-lg px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${isActive ? 'text-blue-600 font-bold' : 'text-gray-700 hover:text-blue-600'
     }`;
 
   const mobileNavLinkClass = ({ isActive }) =>
-    `block py-2.5 transition-colors text-base font-semibold ${isActive ? 'text-blue-600 font-bold bg-blue-50/50 rounded-xl' : 'text-gray-800 hover:text-blue-600'
+    `block py-2.5 transition-colors text-base font-semibold rounded-xl px-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${isActive ? 'text-blue-600 font-bold bg-blue-50/50' : 'text-gray-800 hover:text-blue-600'
     }`;
 
   return (
     <nav className="sticky top-0 left-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
       <div className="max-w-[1240px] mx-auto px-4 h-[80px] flex justify-between items-center">
         {/* Brand Logo */}
-        <Link to="/" onClick={closeMenu} className="text-2xl font-extrabold tracking-tight text-gray-900 cursor-pointer">
+        <Link to="/" onClick={closeMenu} className="text-2xl font-extrabold tracking-tight text-gray-900 cursor-pointer rounded-lg px-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
           Penny <span className="text-[#1a6fca]">Wise</span>
         </Link>
 
@@ -76,7 +76,7 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
           ) : (
             <button
               onClick={onOpenConnectModal}
-              className="btn inline-flex items-center space-x-2 shadow-sm hover:shadow-md transition-all cursor-pointer"
+              className="btn inline-flex items-center space-x-2 shadow-sm hover:shadow-md transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
             >
               <FaWallet className="text-sm" />
               <span>Connect</span>
@@ -85,16 +85,21 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
         </div>
 
         {/* Hamburger Icon (Mobile/Tablet) */}
-        <div
-          className="md:hidden z-20 cursor-pointer text-gray-800 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+        <button
+          type="button"
+          className="md:hidden z-20 cursor-pointer text-gray-800 p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
           onClick={handleClick}
-          aria-label="Toggle Navigation"
+          aria-label={open ? 'Close main navigation' : 'Open main navigation'}
+          aria-expanded={open}
+          aria-controls="mobile-navigation-menu"
         >
-          {open ? <FaTimes size={22} /> : <FaBars size={22} />}
-        </div>
+          {open ? <FaTimes size={22} aria-hidden="true" /> : <FaBars size={22} aria-hidden="true" />}
+        </button>
 
         {/* Mobile Dropdown Menu */}
         <div
+          id="mobile-navigation-menu"
+          aria-label="Mobile Navigation"
           className={`fixed inset-x-0 top-[80px] bg-white border-b border-gray-200 shadow-xl transition-all duration-300 ease-in-out md:hidden ${open ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-4 pointer-events-none'
             }`}
         >
