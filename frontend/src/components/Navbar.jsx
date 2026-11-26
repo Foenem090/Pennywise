@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { FaBars, FaTimes, FaWallet } from 'react-icons/fa';
 
 const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
   const [open, setOpen] = useState(false);
+  const hamburgerRef = useRef(null);
 
   const handleClick = () => {
     setOpen(!open);
@@ -11,7 +12,19 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
 
   const closeMenu = () => {
     setOpen(false);
+    hamburgerRef.current?.focus();
   };
+
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        closeMenu();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open]);
 
   const formatAddress = (addr) => {
     if (!addr) return '';
@@ -35,7 +48,7 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
         </Link>
 
         {/* Desktop Navigation Links */}
-        <ul className="hidden md:flex items-center space-x-8 font-medium">
+        <ul className="hidden lg:flex items-center space-x-8 font-medium">
           <li>
             <NavLink to="/" end className={navLinkClass}>
               Home
@@ -64,7 +77,7 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
         </ul>
 
         {/* Action Button (Desktop) */}
-        <div className="hidden md:flex items-center">
+        <div className="hidden lg:flex items-center">
           {connectedAccount ? (
             <button
               onClick={onOpenConnectModal}
@@ -86,8 +99,9 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
 
         {/* Hamburger Icon (Mobile/Tablet) */}
         <button
+          ref={hamburgerRef}
           type="button"
-          className="md:hidden z-20 cursor-pointer text-gray-800 p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+          className="lg:hidden z-20 cursor-pointer text-gray-800 p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
           onClick={handleClick}
           aria-label={open ? 'Close main navigation' : 'Open main navigation'}
           aria-expanded={open}
@@ -100,7 +114,7 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
         <div
           id="mobile-navigation-menu"
           aria-label="Mobile Navigation"
-          className={`fixed inset-x-0 top-[80px] bg-white border-b border-gray-200 shadow-xl transition-all duration-300 ease-in-out md:hidden ${open ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-4 pointer-events-none'
+          className={`fixed inset-x-0 top-[80px] bg-white border-b border-gray-200 shadow-xl transition-all duration-300 ease-in-out lg:hidden ${open ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-4 pointer-events-none'
             }`}
         >
           <ul className="flex flex-col p-6 space-y-2 text-center text-lg">
@@ -156,6 +170,14 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
             </li>
           </ul>
         </div>
+        {/* Mobile backdrop — closes menu when tapping outside the drawer */}
+        {open && (
+          <div
+            className="fixed inset-0 z-30 lg:hidden"
+            onClick={closeMenu}
+            aria-hidden="true"
+          />
+        )}
       </div>
     </nav>
   );
