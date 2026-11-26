@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaEnvelope, FaPhoneAlt, FaMapMarkerAlt, FaClock, FaPaperPlane } from 'react-icons/fa';
 import { apiService } from '../services/api';
+import { extractApiErrorMessage } from '../utils/apiError';
 
 const ContactPage = ({ onNotify }) => {
   const [formData, setFormData] = useState({
@@ -57,9 +58,10 @@ const ContactPage = ({ onNotify }) => {
         message: '',
       });
     } catch (err) {
-      const errorText =
-        err?.response?.data?.detail ||
-        'Unable to send inquiry at this time. Please check your connection or contact us directly.';
+      const errorText = extractApiErrorMessage(
+        err,
+        'Unable to send inquiry at this time. Please check your connection or contact us directly.'
+      );
       setStatusMsg({ type: 'error', text: errorText });
       if (onNotify) onNotify(errorText, 'error');
     } finally {

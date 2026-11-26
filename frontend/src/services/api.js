@@ -2,12 +2,15 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
 
+const DEFAULT_TIMEOUT_MS = 15000;
+const FORM_SUBMISSION_TIMEOUT_MS = 60000;
+
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 8000,
+  timeout: DEFAULT_TIMEOUT_MS,
 });
 
 export const apiService = {
@@ -27,15 +30,23 @@ export const apiService = {
     return response.data;
   },
 
-  // Newsletter Subscription
+  // Newsletter Subscription (extended timeout for cold starts and email dispatch)
   async subscribeNewsletter(email) {
-    const response = await apiClient.post('/newsletter/subscribe', { email });
+    const response = await apiClient.post(
+      '/newsletter/subscribe',
+      { email },
+      { timeout: FORM_SUBMISSION_TIMEOUT_MS }
+    );
     return response.data;
   },
 
-  // Contact Inquiries
+  // Contact Inquiries (extended timeout for cold starts and email dispatch)
   async submitContact(data) {
-    const response = await apiClient.post('/contact', data);
+    const response = await apiClient.post(
+      '/contact',
+      data,
+      { timeout: FORM_SUBMISSION_TIMEOUT_MS }
+    );
     return response.data;
   },
 

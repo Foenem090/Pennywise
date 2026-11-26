@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import img from '../assets/trade.png';
 import { apiService } from '../services/api';
+import { extractApiErrorMessage } from '../utils/apiError';
 import { FaCalculator } from 'react-icons/fa';
 
 const DEFAULT_RATES = {
@@ -85,9 +86,10 @@ const Earn = ({ onNotify }) => {
       }
       setEmail('');
     } catch (err) {
-      const errorMsg =
-        err?.response?.data?.detail ||
-        'Unable to subscribe right now. Please try again later.';
+      const errorMsg = extractApiErrorMessage(
+        err,
+        'Unable to subscribe right now. Please try again later.'
+      );
       if (onNotify) onNotify(errorMsg, 'error');
     } finally {
       setIsSubmitting(false);
@@ -132,7 +134,8 @@ const Earn = ({ onNotify }) => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email for earn alerts..."
+                  placeholder="Enter your email..."
+                  aria-label="Email address for earn alerts"
                   disabled={isSubmitting}
                   required
                   className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-gray-800 placeholder-gray-400 shadow-sm transition-all"
@@ -153,7 +156,7 @@ const Earn = ({ onNotify }) => {
         {/* Interactive APY Earnings Calculator Widget */}
         <div className="max-w-[1000px] mx-auto mt-16 px-4">
           <div className="bg-slate-50 border border-gray-200 rounded-3xl p-6 sm:p-10 shadow-sm">
-            
+
             {/* Widget Title */}
             <div className="flex items-center space-x-3 mb-6">
               <div className="p-3 bg-blue-100 text-blue-600 rounded-2xl">

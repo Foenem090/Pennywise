@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { FaCalculator, FaCoins, FaLock, FaShieldAlt, FaPercent, FaCalendarCheck } from 'react-icons/fa';
 import { apiService } from '../services/api';
+import { extractApiErrorMessage } from '../utils/apiError';
 
 const DEFAULT_RATES = {
   USDC: 12.0,
@@ -70,7 +71,7 @@ const EarnPage = ({ onNotify, onOpenConnectModal }) => {
       if (onNotify) onNotify(res.message || 'Subscribed to staking rewards alerts!', 'success');
       setEmail('');
     } catch (err) {
-      const msg = err?.response?.data?.detail || 'Subscription failed. Please try again.';
+      const msg = extractApiErrorMessage(err, 'Subscription failed. Please try again.');
       if (onNotify) onNotify(msg, 'error');
     } finally {
       setIsSubmitting(false);

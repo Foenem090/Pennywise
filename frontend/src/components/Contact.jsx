@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaEnvelope, FaClock, FaShieldAlt, FaPaperPlane } from 'react-icons/fa';
 import { apiService } from '../services/api';
+import { extractApiErrorMessage } from '../utils/apiError';
 
 const Contact = ({ onNotify }) => {
   const [formData, setFormData] = useState({
@@ -49,9 +50,10 @@ const Contact = ({ onNotify }) => {
       }
       setFormData({ name: '', email: '', message: '' });
     } catch (err) {
-      const errorMsg =
-        err?.response?.data?.detail ||
-        'Unable to send your message right now. Please check your connection and try again.';
+      const errorMsg = extractApiErrorMessage(
+        err,
+        'Unable to send your message right now. Please check your connection and try again.'
+      );
       setFeedback({ type: 'error', text: errorMsg });
       if (onNotify) {
         onNotify(errorMsg, 'error');

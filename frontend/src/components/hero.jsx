@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import heroimg from '../assets/bgImg.jpg';
 import { apiService } from '../services/api';
+import { extractApiErrorMessage } from '../utils/apiError';
 
 const Hero = ({ onNotify }) => {
   const [email, setEmail] = useState('');
@@ -21,9 +22,10 @@ const Hero = ({ onNotify }) => {
       }
       setEmail('');
     } catch (err) {
-      const errorMsg =
-        err?.response?.data?.detail ||
-        'Unable to complete subscription. Please verify your connection and try again.';
+      const errorMsg = extractApiErrorMessage(
+        err,
+        'Unable to complete subscription. Please verify your connection and try again.'
+      );
       if (onNotify) onNotify(errorMsg, 'error');
     } finally {
       setIsLoading(false);

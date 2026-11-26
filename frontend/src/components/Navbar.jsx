@@ -19,13 +19,11 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
   };
 
   const navLinkClass = ({ isActive }) =>
-    `transition-colors duration-200 text-sm font-semibold ${
-      isActive ? 'text-blue-600 font-bold' : 'text-gray-700 hover:text-blue-600'
+    `transition-colors duration-200 text-sm font-semibold ${isActive ? 'text-blue-600 font-bold' : 'text-gray-700 hover:text-blue-600'
     }`;
 
   const mobileNavLinkClass = ({ isActive }) =>
-    `block py-2.5 transition-colors text-base font-semibold ${
-      isActive ? 'text-blue-600 font-bold bg-blue-50/50 rounded-xl' : 'text-gray-800 hover:text-blue-600'
+    `block py-2.5 transition-colors text-base font-semibold ${isActive ? 'text-blue-600 font-bold bg-blue-50/50 rounded-xl' : 'text-gray-800 hover:text-blue-600'
     }`;
 
   return (
@@ -33,7 +31,7 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
       <div className="max-w-[1240px] mx-auto px-4 h-[80px] flex justify-between items-center">
         {/* Brand Logo */}
         <Link to="/" onClick={closeMenu} className="text-2xl font-extrabold tracking-tight text-gray-900 cursor-pointer">
-          Penny <span className="text-[#1a6fca]">Wise</span>  
+          Penny <span className="text-[#1a6fca]">Wise</span>
         </Link>
 
         {/* Desktop Navigation Links */}
@@ -87,7 +85,7 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
         </div>
 
         {/* Hamburger Icon (Mobile/Tablet) */}
-        <div 
+        <div
           className="md:hidden z-20 cursor-pointer text-gray-800 p-2 rounded-lg hover:bg-gray-100 transition-colors"
           onClick={handleClick}
           aria-label="Toggle Navigation"
@@ -97,9 +95,8 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
 
         {/* Mobile Dropdown Menu */}
         <div
-          className={`fixed inset-x-0 top-[80px] bg-white border-b border-gray-200 shadow-xl transition-all duration-300 ease-in-out md:hidden ${
-            open ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-4 pointer-events-none'
-          }`}
+          className={`fixed inset-x-0 top-[80px] bg-white border-b border-gray-200 shadow-xl transition-all duration-300 ease-in-out md:hidden ${open ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-4 pointer-events-none'
+            }`}
         >
           <ul className="flex flex-col p-6 space-y-2 text-center text-lg">
             <li>
@@ -129,7 +126,7 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
             </li>
             <li className="pt-3">
               {connectedAccount ? (
-                <button 
+                <button
                   onClick={() => {
                     closeMenu();
                     onOpenConnectModal();
@@ -140,7 +137,7 @@ const Navbar = ({ onOpenConnectModal, connectedAccount }) => {
                   <span>{formatAddress(connectedAccount)}</span>
                 </button>
               ) : (
-                <button 
+                <button
                   onClick={() => {
                     closeMenu();
                     onOpenConnectModal();
