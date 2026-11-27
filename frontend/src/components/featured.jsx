@@ -21,6 +21,9 @@ const Featured = () => {
   const [isSearching, setIsSearching] = useState(false);
   const searchDebounceRef = useRef(null);
   const latestQueryRef = useRef('');
+  const modalRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const triggerRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -53,7 +56,9 @@ const Featured = () => {
     };
   }, []);
 
-  const handleOpenExpanded = () => {
+  const handleOpenExpanded = (e) => {
+    // Capture triggering card element for focus restoration upon close
+    triggerRef.current = e?.currentTarget || document.activeElement;
     setShowExpanded(true);
     setSearchQuery('');
     latestQueryRef.current = '';
@@ -75,6 +80,64 @@ const Featured = () => {
         }
       });
   };
+
+  useEffect(() => {
+    if (!showExpanded) return;
+
+    // 1. Place initial focus into search input once modal is rendered
+    const frameId = requestAnimationFrame(() => {
+      searchInputRef.current?.focus();
+    });
+
+    // 2. Escape key dismissal and focus trap
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setShowExpanded(false);
+        return;
+      }
+
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusableElements = Array.from(
+          modalRef.current.querySelectorAll(
+            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          )
+        ).filter((el) => el.offsetParent !== null || el.offsetWidth > 0 || el.offsetHeight > 0);
+
+        if (focusableElements.length === 0) {
+          e.preventDefault();
+          return;
+        }
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement || !modalRef.current.contains(document.activeElement)) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement || !modalRef.current.contains(document.activeElement)) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      document.removeEventListener('keydown', handleKeyDown);
+
+      // 3. Restore focus to the exact card that opened the modal
+      if (triggerRef.current && typeof triggerRef.current.focus === 'function' && triggerRef.current.isConnected) {
+        triggerRef.current.focus();
+      }
+    };
+  }, [showExpanded]);
 
   const handleSearch = (e) => {
     const query = e.target.value;
@@ -159,9 +222,9 @@ const Featured = () => {
             <div>
               <Link 
                 to="/markets"
-                className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
               >
-                See All Markets &rarr;
+                See All Markets <span aria-hidden="true">&rarr;</span>
               </Link>
             </div>
           </div>
@@ -191,16 +254,19 @@ const Featured = () => {
                   const isNegative = (coin.price_change_percentage_24h || 0) < 0;
 
                   return (
-                    <div
+                    <button
                       key={coin.id}
+                      type="button"
                       onClick={handleOpenExpanded}
-                      className="flex flex-col justify-between p-5 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md hover:border-gray-200 transition-all duration-200 cursor-pointer group"
+                      aria-label={`View ${coin.name} (${coin.symbol.toUpperCase()}) market details`}
+                      className="w-full text-left flex flex-col justify-between p-5 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md hover:border-gray-200 transition-all duration-200 cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                     >
                       {/* Top: Icon + Name */}
                       <div className="flex items-center space-x-3 mb-4">
                         <img
                           src={coin.image}
-                          alt={coin.name}
+                          alt=""
+                          aria-hidden="true"
                           className="w-10 h-10 object-contain rounded-full"
                           onError={(e) => {
                             e.target.style.display = 'none';
@@ -217,7 +283,7 @@ const Featured = () => {
                       </div>
 
                       {/* Bottom: Price + 24h Percentage */}
-                      <div className="flex justify-between items-end pt-2 border-t border-gray-50">
+                      <div className="w-full flex justify-between items-end pt-2 border-t border-gray-50">
                         <div>
                           <p className="text-xs text-gray-400 font-medium">Price</p>
                           <p className="text-base font-bold text-gray-900">
@@ -234,16 +300,16 @@ const Featured = () => {
                           }`}
                         >
                           {isNegative ? (
-                            <FiArrowDown size={16} />
+                            <FiArrowDown size={16} aria-hidden="true" />
                           ) : (
-                            <FiArrowUpRight size={16} />
+                            <FiArrowUpRight size={16} aria-hidden="true" />
                           )}
                           <span>
                             {Math.abs(coin.price_change_percentage_24h || 0).toFixed(2)}%
                           </span>
                         </div>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
           </div>
@@ -253,33 +319,55 @@ const Featured = () => {
 
       {/* Expanded Cryptocurrency Market Modal / Drawer */}
       {showExpanded && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[85vh] flex flex-col overflow-hidden animate-fade-in border border-gray-100">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowExpanded(false);
+            }
+          }}
+        >
+          <div
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="market-modal-title"
+            aria-describedby="market-modal-desc"
+            className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[85vh] flex flex-col overflow-hidden animate-fade-in border border-gray-100"
+          >
             {/* Header */}
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900">Cryptocurrency Markets</h3>
-                <p className="text-xs text-gray-500 mt-1">Live prices, 24h changes, and market caps</p>
+                <h3 id="market-modal-title" className="text-2xl font-bold text-gray-900">
+                  Cryptocurrency Markets
+                </h3>
+                <p id="market-modal-desc" className="text-xs text-gray-500 mt-1">
+                  Live prices, 24h changes, and market caps
+                </p>
               </div>
               <button
+                type="button"
                 onClick={() => setShowExpanded(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-100 transition-colors"
+                className="p-2 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                 aria-label="Close markets modal"
               >
-                <FiX size={20} />
+                <FiX size={20} aria-hidden="true" />
               </button>
             </div>
 
             {/* Search Input */}
-            <div className="p-4 px-6 bg-slate-50 border-b border-gray-100">
+            <div className="p-4 px-6 bg-slate-50 border-b border-gray-100 shrink-0">
               <div className="relative">
-                <FiSearch className="absolute left-3.5 top-3.5 text-gray-400" size={18} />
+                <FiSearch className="absolute left-3.5 top-3.5 text-gray-400" size={18} aria-hidden="true" />
                 <input
+                  ref={searchInputRef}
                   type="text"
+                  id="market-modal-search"
+                  aria-label="Search cryptocurrency markets by name or symbol"
                   value={searchQuery}
                   onChange={handleSearch}
                   placeholder="Search by coin name or symbol (e.g. Bitcoin, sol, ada)..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900 placeholder:text-gray-400"
                 />
               </div>
             </div>
@@ -287,10 +375,21 @@ const Featured = () => {
             {/* Table / List */}
             <div className="overflow-y-auto flex-1 p-6">
               {isSearching ? (
-                <div className="py-12 text-center text-sm text-gray-500">Searching markets...</div>
+                <div role="status" aria-live="polite" className="py-12 text-center text-sm text-gray-500">
+                  Searching markets...
+                </div>
               ) : searchResults.length === 0 ? (
-                <div className="py-12 text-center text-sm text-gray-500">
-                  No cryptocurrencies found matching "{searchQuery}".
+                <div role="status" aria-live="polite" className="py-12 text-center text-sm text-gray-500 space-y-3">
+                  <p>No cryptocurrencies found matching &ldquo;{searchQuery}&rdquo;.</p>
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => handleSearch({ target: { value: '' } })}
+                      className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold hover:bg-blue-100 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                    >
+                      Clear Search
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -304,7 +403,8 @@ const Featured = () => {
                         <div className="flex items-center space-x-3">
                           <img
                             src={coin.image}
-                            alt={coin.name}
+                            alt=""
+                            aria-hidden="true"
                             className="w-9 h-9 rounded-full object-contain"
                             onError={(e) => {
                               e.target.style.display = 'none';
@@ -327,7 +427,11 @@ const Featured = () => {
                               isNeg ? 'text-[#F6465D] bg-red-50' : 'text-[#0ECB81] bg-emerald-50'
                             }`}
                           >
-                            {isNeg ? <FiArrowDown size={12} /> : <FiArrowUpRight size={12} />}
+                            {isNeg ? (
+                              <FiArrowDown size={12} aria-hidden="true" />
+                            ) : (
+                              <FiArrowUpRight size={12} aria-hidden="true" />
+                            )}
                             <span>{Math.abs(coin.price_change_percentage_24h || 0).toFixed(2)}%</span>
                           </div>
                         </div>
@@ -339,11 +443,14 @@ const Featured = () => {
             </div>
 
             {/* Footer */}
-            <div className="p-4 px-6 border-t border-gray-100 bg-slate-50 flex justify-between items-center text-xs text-gray-500">
-              <span>Showing {searchResults.length} assets</span>
+            <div className="p-4 px-6 border-t border-gray-100 bg-slate-50 flex justify-between items-center text-xs text-gray-500 shrink-0">
+              <span aria-live="polite" aria-atomic="true">
+                Showing {searchResults.length} {searchResults.length === 1 ? 'asset' : 'assets'}
+              </span>
               <button
+                type="button"
                 onClick={() => setShowExpanded(false)}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-semibold transition-colors"
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-semibold transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
               >
                 Close
               </button>
