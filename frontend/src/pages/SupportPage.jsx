@@ -270,7 +270,11 @@ const SupportPage = () => {
         {/* Knowledge Base Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           {filteredTopics.length === 0 ? (
-            <div className="col-span-1 md:col-span-2 bg-white p-10 rounded-3xl border border-gray-100 shadow-sm text-center">
+            <div
+              role="status"
+              aria-live="polite"
+              className="col-span-1 md:col-span-2 bg-white p-10 rounded-3xl border border-gray-100 shadow-sm text-center"
+            >
               <p className="text-gray-600 text-base">
                 No help topics found matching &ldquo;{searchQuery}&rdquo;.
               </p>
